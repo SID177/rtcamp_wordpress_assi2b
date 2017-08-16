@@ -92,15 +92,16 @@ class SID177_contributors_plugin{
         $users = new WP_User_Query( array( 'include' => $authors ) );
         $users=$users->results;
         ob_start();
-        if(isset($users[0]))
+        if(isset($users[0])){
             echo "<br/><hr/><strong>Contributors: </strong><br/>";
-        foreach ($users as $user) {
-            echo "<div style='display:inline-block; padding:10px 20px 10px 0px;'>";
-            echo "<a href='".get_author_posts_url($user->ID)."'>";
-            echo "<div class='avatar_wrapper'>".get_avatar($user->ID)."</div><br/>";
-            echo $user->user_login."</a></div>";
+            foreach ($users as $user) {
+	            echo "<div style='display:inline-block; padding:10px 20px 10px 0px;'>";
+	            echo "<a href='".get_author_posts_url($user->ID)."'>";
+	            echo "<div class='avatar_wrapper'>".get_avatar($user->ID)."</div><br/>";
+	            echo $user->user_login."</a></div>";
+	        }
+	        echo "<hr/>";
         }
-        echo "<hr/>";
         $o=ob_get_contents();
         ob_end_clean();
         return $content.$o;
