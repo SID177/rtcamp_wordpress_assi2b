@@ -104,12 +104,14 @@ class SID177_contributors_plugin{
 			      	foreach ($users as $user) {
 			      		?>
 				        <div style='display:inline-block; padding:10px 20px 10px 0px;'>
-				      		<a href="<?php echo get_author_posts_url($user->ID); ?>">
+				        	<center>
+				      		<a style="text-align: center;" href="<?php echo get_author_posts_url($user->ID); ?>">
 				      			<div class='avatar_wrapper'>
 				      			<?php echo get_avatar($user->ID); ?>
 				      			</div>
 				      			<?php echo $user->user_login; ?>
 				      		</a>
+				      		</center>
 				        </div>
 				        <?php
 				    }
@@ -205,8 +207,8 @@ class SID177_contributors_plugin{
     }
 
     public function SID177_contributors_clearauthor($post_id){
-    	delete_post_meta($post_id,$this->coauthor_metakey);
-    	delete_post_meta($post_id,$this->coauthor_showmultiple);
+    	// delete_post_meta($post_id,$this->coauthor_metakey);
+    	// delete_post_meta($post_id,$this->coauthor_showmultiple);
     }
 
     public function SID177_coauthor_posttable_head($defaults) {
