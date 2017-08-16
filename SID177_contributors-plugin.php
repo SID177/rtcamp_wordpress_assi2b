@@ -194,11 +194,14 @@ class SID177_contributors_plugin{
 
     public function SID177_contributors_addauthor($post_id,$post,$update){
         if(isset($_REQUEST['author_update'])){
-            $authors=isset($_REQUEST['author'])?implode(",",$_REQUEST['author']):"";
+            $authors=isset($_REQUEST['author'])?$_REQUEST['author']:"";
+            $authors=sanitize_text_field($_REQUEST['author']);
+            $authors=implode(",",$authors);
+
             update_post_meta($post_id,$this->coauthor_metakey,$authors);
 
             if(isset($_REQUEST['show_multiple'])){
-	        	update_post_meta($post_id,$this->coauthor_showmultiple,$_REQUEST['show_multiple']);
+	        	update_post_meta($post_id,$this->coauthor_showmultiple,sanitize_text_field($_REQUEST['show_multiple']));
 	        }else{
 	        	delete_post_meta($post_id,$this->coauthor_showmultiple);
 	        }
