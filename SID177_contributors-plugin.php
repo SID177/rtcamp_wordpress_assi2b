@@ -132,7 +132,7 @@ class SID177_contributors_plugin{
         $x=plugin_basename( __DIR__ );
         ?>
         <style type="text/css">
-            #<?php echo $this->metabox_id; ?> .co-authors{
+            #<?php echo esc_html($this->metabox_id); ?> .co-authors{
                 height:10em;
                 overflow: auto;
             }
@@ -162,9 +162,9 @@ class SID177_contributors_plugin{
                 if($post->post_author==$user->ID)
                     continue;
                 ?>
-                <div id="<?php echo $user->user_login.', '.$user->display_name.' '.$user->user_email; ?>">
-                	<input type="checkbox" value="<?php echo $user->ID; ?>" form="post" name="author[]" <?php echo isset($authors[$user->ID])?"checked":""; ?> />
-                	<?php echo $user->user_login; ?>
+                <div id="<?php echo esc_html($user->user_login.' '.$user->display_name.' '.$user->user_email); ?>">
+                	<input type="checkbox" value="<?php echo esc_html($user->ID); ?>" form="post" name="author[]" <?php echo esc_html(isset($authors[$user->ID])?"checked":""); ?> />
+                	<?php echo esc_html($user->user_login); ?>
                 	<br/>
                 </div>
                 <?php
@@ -176,8 +176,8 @@ class SID177_contributors_plugin{
         <br/>
         <input type="hidden" form="post" name="author_update" value="author_update" />
         <div>
-            <!-- [<?php //echo $this->coauthor_shortcode; ?> id="<?php //echo $post->ID; ?>"] -->
-            <input type="checkbox" form="post" name="show_multiple" value="show_multiple" <?php echo is_null($show_multiple)?"":"checked"; ?> />
+            
+            <input type="checkbox" form="post" name="show_multiple" value="show_multiple" <?php echo esc_html(is_null($show_multiple)?"":"checked"); ?> />
             <!-- <br/> -->
             <!-- <strong>Paste this shortcode to show co-authors in the post.</strong> -->
             <strong>Show multiple aurhors in this post.</strong>
@@ -195,8 +195,6 @@ class SID177_contributors_plugin{
     public function SID177_contributors_addauthor($post_id,$post,$update){
         if(isset($_REQUEST['author_update'])){
             $authors=isset($_REQUEST['author'])?implode(",",$_REQUEST['author']):"";
-            print_r($authors);
-            // die;
             update_post_meta($post_id,$this->coauthor_metakey,$authors);
 
             if(isset($_REQUEST['show_multiple'])){
@@ -223,7 +221,7 @@ class SID177_contributors_plugin{
             $users=new WP_User_Query(array('include'=>$authors));
             $users=$users->results;
             foreach($users as $user)
-                echo $user->user_login.", ";
+                echo esc_html($user->user_login.", ");
         }
     }
 }
