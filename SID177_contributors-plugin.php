@@ -27,8 +27,8 @@ class SID177_contributors_plugin{
         add_action('delete_post',array($this,'SID177_contributors_clearauthor'),10);
 
         
-        $this->css=plugins_url()."/SID177_contributors-plugin/assets/css/";
-        $this->js=plugins_url()."/SID177_contributors-plugin/assets/js/";
+        $this->css=plugins_url()."/".plugin_basename( __DIR__ )."/assets/css/";
+        $this->js=plugins_url()."/".plugin_basename( __DIR__ )."/assets/js/";
 
         $this->frontend_style=$this->css."frontend-style.css";
         $this->frontend_script=$this->js."frontend-app.js";
@@ -129,7 +129,13 @@ class SID177_contributors_plugin{
 
     public function SID177_contributors_metabox(){
         wp_enqueue_script('admin-app.js',$this->admin_script);
+        // die;/s
+        $x=plugin_basename( __DIR__ );
+        // echo $x;
         ?>
+        <script type="text/javascript">
+            alert('<?php echo $x; ?>');
+        </script>
         <style type="text/css">
             #<?php echo $this->metabox_id; ?> .co-authors{
                 height:10em;
