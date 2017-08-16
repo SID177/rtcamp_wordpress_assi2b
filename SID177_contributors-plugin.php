@@ -97,7 +97,7 @@ class SID177_contributors_plugin{
         if(isset($users[0])){
         	echo "<br>";
         	?>
-        	<div class="container">
+        	<div class="container" style="border: solid 1px #717171; border-radius: 4px !important;">
         		<button class="accordion">Contributors</button>
         		<div class="panel">
 				  	<?php
