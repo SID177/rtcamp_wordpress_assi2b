@@ -105,11 +105,11 @@ class SID177_contributors_plugin{
 			      		?>
 				        <div style='display:inline-block; padding:10px 20px 10px 0px;'>
 				        	<center>
-				      		<a style="text-align: center;" href="<?php echo get_author_posts_url($user->ID); ?>">
+				      		<a style="text-align: center;" href="<?php echo esc_url(get_author_posts_url($user->ID)); ?>">
 				      			<div class='avatar_wrapper'>
 				      			<?php echo get_avatar($user->ID); ?>
 				      			</div>
-				      			<?php echo $user->user_login; ?>
+				      			<?php echo esc_html($user->user_login); ?>
 				      		</a>
 				      		</center>
 				        </div>
@@ -129,13 +129,8 @@ class SID177_contributors_plugin{
 
     public function SID177_contributors_metabox(){
         wp_enqueue_script('admin-app.js',$this->admin_script);
-        // die;/s
         $x=plugin_basename( __DIR__ );
-        // echo $x;
         ?>
-        <script type="text/javascript">
-            alert('<?php echo $x; ?>');
-        </script>
         <style type="text/css">
             #<?php echo $this->metabox_id; ?> .co-authors{
                 height:10em;
