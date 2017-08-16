@@ -79,7 +79,7 @@ class SID177_contributors_plugin{
 
     public function SID177_contributors_filtercontent($content=null){
     	wp_enqueue_style('admin-style.css',$this->admin_style);
-
+    	wp_enqueue_script('admin-col.js',$this->js."admin-col.js");
     	global $post;
 
     	$show_multiple=get_post_meta($post->ID,$this->coauthor_showmultiple);
@@ -95,14 +95,28 @@ class SID177_contributors_plugin{
         $users=$users->results;
         ob_start();
         if(isset($users[0])){
-            echo "<br/><hr/><strong>Contributors: </strong><br/>";
-            foreach ($users as $user) {
-	            echo "<div style='display:inline-block; padding:10px 20px 10px 0px;'>";
-	            echo "<a href='".get_author_posts_url($user->ID)."'>";
-	            echo "<div class='avatar_wrapper'>".get_avatar($user->ID)."</div><br/>";
-	            echo $user->user_login."</a></div>";
-	        }
-	        echo "<hr/>";
+        	echo "<br>";
+        	?>
+        	<div class="container">
+        		<button class="accordion">Contributors</button>
+        		<div class="panel">
+				  	<?php
+			      	foreach ($users as $user) {
+			      		?>
+				        <div style='display:inline-block; padding:10px 20px 10px 0px;'>
+				      		<a href="<?php echo get_author_posts_url($user->ID); ?>">
+				      			<div class='avatar_wrapper'>
+				      			<?php echo get_avatar($user->ID); ?>
+				      			</div>
+				      			<?php echo $user->user_login; ?>
+				      		</a>
+				        </div>
+				        <?php
+				    }
+				    ?>
+				</div>
+			</div>
+        	<?php
         }
         $o=ob_get_contents();
         ob_end_clean();
@@ -112,7 +126,7 @@ class SID177_contributors_plugin{
     // public function SID177_cont
 
     public function SID177_contributors_metabox(){
-        wp_enqueue_script('app.js',$this->admin_script);
+        wp_enqueue_script('admin-app.js',$this->admin_script);
         ?>
         <style type="text/css">
             #<?php echo $this->metabox_id; ?> .co-authors{
