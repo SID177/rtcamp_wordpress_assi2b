@@ -2,7 +2,9 @@
 /*
 *	Plugin Name: SID177 Contributors Plugin
 *	Author: SID177
-*	Description: This is a basic plugin.
+*	Description: You can add co-authors to any post and can choose to show them
+*	on your post on front-end.
+*	Version: 1.0.0
 */
 
 class SID177_contributors_plugin{
