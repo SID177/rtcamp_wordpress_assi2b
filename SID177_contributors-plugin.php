@@ -94,6 +94,11 @@ class SID177_contributors_plugin{
         $users = new WP_User_Query( array( 'include' => $authors ) );
         $users=$users->results;
         ob_start();
+        ?>
+        <script type="text/javascript">
+                alert('<?php print_r($users[0]); ?>');
+            </script>
+        <?php
         if(isset($users[0])){
         	echo "<br>";
         	?>
@@ -195,7 +200,7 @@ class SID177_contributors_plugin{
     public function SID177_contributors_addauthor($post_id,$post,$update){
         if(isset($_REQUEST['author_update'])){
             $authors=isset($_REQUEST['author'])?$_REQUEST['author']:"";
-            $authors=sanitize_text_field($_REQUEST['author']);
+            // $authors=sanitize_text_field($_REQUEST['author']);
             $authors=implode(",",$authors);
 
             update_post_meta($post_id,$this->coauthor_metakey,$authors);
