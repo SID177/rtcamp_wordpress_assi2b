@@ -1,5 +1,10 @@
 <?php
 /*
+
+358
+1
+2
+
 *	Plugin Name: SID177 Contributors Plugin
 *	Author: SID177
 *	Description: You can add co-authors to any post and can choose to show them
@@ -16,6 +21,7 @@ class SID177_contributors_plugin{
     	*/
     	add_filter('manage_'.$this->post_type.'s_columns',array($this,'SID177_coauthor_posttable_head'));
     	add_filter('the_content',array($this,'SID177_contributors_filtercontent'));
+        add_filter('user_has_cap',array($this,'SID177_contributors_changecap'),10,3);
 
 
     	/*
@@ -49,6 +55,9 @@ class SID177_contributors_plugin{
     private $css,$js;
     private $frontend_style,$frontend_script;
     private $admin_style,$admin_script;
+
+    private $role_name="SID177_contributor";
+    private $role_display="SID177 Post Contributor";
 
     /*public function SID177_contributors_shortcode_html($attr=[],$content=null){
         $attr = array_change_key_case((array)$attr, CASE_LOWER);
@@ -94,11 +103,6 @@ class SID177_contributors_plugin{
         $users = new WP_User_Query( array( 'include' => $authors ) );
         $users=$users->results;
         ob_start();
-        ?>
-        <script type="text/javascript">
-                alert('<?php print_r($users[0]); ?>');
-            </script>
-        <?php
         if(isset($users[0])){
         	echo "<br>";
         	?>
@@ -134,11 +138,10 @@ class SID177_contributors_plugin{
 
     public function SID177_contributors_metabox(){
         wp_enqueue_script('admin-app.js',$this->admin_script);
-        $x=plugin_basename( __DIR__ );
         ?>
         <style type="text/css">
             #<?php echo esc_html($this->metabox_id); ?> .co-authors{
-                height:10em;
+                max-height:10em;
                 overflow: auto;
             }
         </style>
@@ -166,10 +169,14 @@ class SID177_contributors_plugin{
             foreach ($users as $user) {
                 if($post->post_author==$user->ID)
                     continue;
+                if(!user_can($user->ID,"edit_posts"))
+                	continue;
+                $firstname=get_user_meta($user->ID,'first_name',true);
+                $lastname=get_user_meta($user->ID,'last_name',true);
                 ?>
-                <div id="<?php echo esc_html($user->user_login.' '.$user->display_name.' '.$user->user_email); ?>">
+                <div id="<?php echo esc_html($user->user_login.' '.$firstname.' '.$lastname.' '.$user->display_name.' '.$user->user_email); ?>">
                 	<input type="checkbox" value="<?php echo esc_html($user->ID); ?>" form="post" name="author[]" <?php echo esc_html(isset($authors[$user->ID])?"checked":""); ?> />
-                	<?php echo esc_html($user->user_login); ?>
+                	<?php echo esc_html((empty($firstname) || empty($lastname)?$user->display_name:$firstname.' '.$lastname)." (".$user->user_login.")"); ?>
                 	<br/>
                 </div>
                 <?php
@@ -200,9 +207,17 @@ class SID177_contributors_plugin{
     public function SID177_contributors_addauthor($post_id,$post,$update){
         if(isset($_REQUEST['author_update'])){
             $authors=isset($_REQUEST['author'])?$_REQUEST['author']:"";
+            $new_authors=array();
             // $authors=sanitize_text_field($_REQUEST['author']);
-            $authors=implode(",",$authors);
 
+            foreach ($authors as $author) {
+            	$user=get_userdata($author);
+            	if($user){
+            		array_push($new_authors,$author);
+            	}
+            }
+
+            $authors=implode(",",$new_authors);
             update_post_meta($post_id,$this->coauthor_metakey,$authors);
 
             if(isset($_REQUEST['show_multiple'])){
@@ -231,6 +246,25 @@ class SID177_contributors_plugin{
             foreach($users as $user)
                 echo esc_html($user->user_login.", ");
         }
+    }
+
+
+    public function SID177_contributors_changecap($allcaps,$caps,$args){
+        $post_id=isset($args[2])?$args[2]:0;
+        $obj=get_post_type_object(get_post_type($post_id));
+        if(!$obj)
+            return $allcaps;
+        $authors=get_post_meta($post_id,$this->coauthor_metakey,true);
+        if(!$authors)
+            return $allcaps;
+        $authors=explode(',',$authors);
+        foreach ($authors as $author) {
+            if($author==wp_get_current_user()->ID){
+                $allcaps[$obj->cap->edit_others_posts]=true;
+                return $allcaps;
+            }
+        }
+        return $allcaps;
     }
 }
 new SID177_contributors_plugin();
