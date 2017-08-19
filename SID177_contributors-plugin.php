@@ -31,6 +31,8 @@ class SID177_contributors_plugin{
         add_action('save_post',array($this,'SID177_contributors_addauthor'),5,3);
         add_action('manage_'.$this->post_type.'s_custom_column',array($this,'SID177_coauthor_posttable'),10,2);
         add_action('delete_post',array($this,'SID177_contributors_clearauthor'),10);
+        add_action('pre_get_posts',array($this,'SID177_contributors_modifyquery1'));
+        add_action('the_posts',array($this,'SID177_contributors_modifyquery'));
 
         
         $this->css=plugins_url()."/".plugin_basename( __DIR__ )."/assets/css/";
@@ -99,7 +101,6 @@ class SID177_contributors_plugin{
     	if(count($authors)==0)
     		return $content;
 
-        $authors=explode(",",$authors[0]);
         $users = new WP_User_Query( array( 'include' => $authors ) );
         $users=$users->results;
         ob_start();
@@ -157,7 +158,7 @@ class SID177_contributors_plugin{
         <div class="co-authors">
             <?php
             global $post;
-            $authors=explode(',',get_post_meta($post->ID,$this->coauthor_metakey)[0]);
+            $authors=get_post_meta($post->ID,$this->coauthor_metakey);
             
             $temp_authors=array();
             for ($i=0; $i < count($authors); $i++) { 
@@ -210,15 +211,13 @@ class SID177_contributors_plugin{
             $new_authors=array();
             // $authors=sanitize_text_field($_REQUEST['author']);
 
+            delete_post_meta($post_id,$this->coauthor_metakey);
             foreach ($authors as $author) {
             	$user=get_userdata($author);
             	if($user){
-            		array_push($new_authors,$author);
+            		add_post_meta($post_id,$this->coauthor_metakey,$author);
             	}
             }
-
-            $authors=implode(",",$new_authors);
-            update_post_meta($post_id,$this->coauthor_metakey,$authors);
 
             if(isset($_REQUEST['show_multiple'])){
 	        	update_post_meta($post_id,$this->coauthor_showmultiple,sanitize_text_field($_REQUEST['show_multiple']));
@@ -240,7 +239,9 @@ class SID177_contributors_plugin{
     public function SID177_coauthor_posttable($column_name,$post_id) {
         global $post;
         if($column_name=='co-author') {
-            $authors=explode(',',get_post_meta($post->ID,$this->coauthor_metakey)[0]);
+            $authors=get_post_meta($post->ID,$this->coauthor_metakey);
+            if(!isset($authors[0]))
+            	return;
             $users=new WP_User_Query(array('include'=>$authors));
             $users=$users->results;
             foreach($users as $user)
@@ -254,17 +255,63 @@ class SID177_contributors_plugin{
         $obj=get_post_type_object(get_post_type($post_id));
         if(!$obj)
             return $allcaps;
-        $authors=get_post_meta($post_id,$this->coauthor_metakey,true);
+        $authors=get_post_meta($post_id,$this->coauthor_metakey);
         if(!$authors)
             return $allcaps;
-        $authors=explode(',',$authors);
+        // $authors=explode(',',$authors);
         foreach ($authors as $author) {
             if($author==wp_get_current_user()->ID){
-                $allcaps[$obj->cap->edit_others_posts]=true;
+                $allcaps['edit_others_posts']=true;
+                $allcaps['edit_published_posts']=true;
+                $allcaps['edit_private_posts']=true;
+                // $allcaps[$obj->cap->edit_published_posts]=true;
+                // $allcaps[$obj->cap->edit_private_posts]=true;
+                $allcaps['edit_posts']=true;
+                // $allcaps[$obj->cap->edit_posts]=true;
+                $allcaps['publish_posts']=true;
                 return $allcaps;
             }
         }
         return $allcaps;
+    }
+
+    public function SID177_contributors_modifyquery1($qry){
+    	if(empty($qry->query['author_name']) || $qry->is_admin())
+    		return;
+    	session_start();
+    	$_SESSION['prepost']=$qry->query['author_name'];
+    }
+
+    public function SID177_contributors_modifyquery($posts){
+    	if(!isset($_SESSION['prepost']))
+    		return $posts;
+    	$author=$_SESSION['prepost'];
+    	unset($_SESSION['prepost']);
+
+    	$author=get_user_by('slug',$author);
+    	if(!$author)
+    		return $posts;
+
+    	global $wpdb;
+    	// echo $this->coauthor_metakey.", ".$author->ID;
+    	$coposts=$wpdb->get_results("select post_id from wp_postmeta where meta_key='".$this->coauthor_metakey."' and meta_value='".$author->ID."'");
+    	// $post=get_post(596);
+    	// array_push($posts,$post);
+    	foreach ($coposts as $copost) {
+    		$post=get_post($copost->post_id);
+    		if($post){
+    			$postauthor=get_userdata($post->post_author);
+    			if(!$postauthor)
+    				continue;
+    			// $post->post_content;
+    			$content="<h3 style='color:red;'>This is a contribution post!<br>Created by: <strong><a href='".get_author_posts_url($postauthor->ID)."'>".$postauthor->user_login."</a></strong></h3>";
+    			$post->post_content=$content."".$post->post_content;
+    			array_push($posts,$post);
+    		}
+    	}
+
+    	// die('the posts');
+    	return $posts;
     }
 }
 new SID177_contributors_plugin();
