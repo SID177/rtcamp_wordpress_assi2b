@@ -212,11 +212,13 @@ class SID177_contributors_plugin{
             // $authors=sanitize_text_field($_REQUEST['author']);
 
             delete_post_meta($post_id,$this->coauthor_metakey);
-            foreach ($authors as $author) {
-            	$user=get_userdata($author);
-            	if($user){
-            		add_post_meta($post_id,$this->coauthor_metakey,$author);
-            	}
+            if(is_array($authors)){
+            	foreach ($authors as $author) {
+	            	$user=get_userdata($author);
+	            	if($user){
+	            		add_post_meta($post_id,$this->coauthor_metakey,$author);
+	            	}
+	            }
             }
 
             if(isset($_REQUEST['show_multiple'])){
@@ -293,24 +295,23 @@ class SID177_contributors_plugin{
     		return $posts;
 
     	global $wpdb;
-    	// echo $this->coauthor_metakey.", ".$author->ID;
     	$coposts=$wpdb->get_results("select post_id from wp_postmeta where meta_key='".$this->coauthor_metakey."' and meta_value='".$author->ID."'");
-    	// $post=get_post(596);
-    	// array_push($posts,$post);
     	foreach ($coposts as $copost) {
     		$post=get_post($copost->post_id);
-    		if($post){
+    		if($post && $post->post_status=='publish'){
     			$postauthor=get_userdata($post->post_author);
     			if(!$postauthor)
     				continue;
-    			// $post->post_content;
     			$content="<h3 style='color:red;'>This is a contribution post!<br>Created by: <strong><a href='".get_author_posts_url($postauthor->ID)."'>".$postauthor->user_login."</a></strong></h3>";
     			$post->post_content=$content."".$post->post_content;
     			array_push($posts,$post);
     		}
     	}
-
-    	// die('the posts');
+    	// echo "contr<br/>";
+    	foreach ($posts as $post) {
+    		// echo $post->post_title."<br>";
+    	}
+    	// die;
     	return $posts;
     }
 }
