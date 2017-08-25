@@ -1,10 +1,6 @@
 <?php
 /*
 
-358
-1
-2
-
 *	Plugin Name: SID177 Contributors Plugin
 *	Author: SID177
 *	Description: You can add co-authors to any post and can choose to show them
@@ -60,33 +56,6 @@ class SID177_contributors_plugin{
 
     private $role_name="SID177_contributor";
     private $role_display="SID177 Post Contributor";
-
-    /*public function SID177_contributors_shortcode_html($attr=[],$content=null){
-        $attr = array_change_key_case((array)$attr, CASE_LOWER);
-        $values = shortcode_atts([
-            'id'=>'0'
-        ], $attr,'');
-        $values['id']=trim($values['id']);
-        if($values['id']=='0' || $values['id']=='')
-            return "";
-
-        $authors=explode(",",get_post_meta($values['id'],$this->coauthor_metakey)[0]);
-        $users = new WP_User_Query( array( 'include' => $authors ) );
-        $users=$users->results;
-        ob_start();
-        if(isset($users[0]))
-            echo "<hr/><strong>Co-Authors: </strong><br/>";
-        foreach ($users as $user) {
-            echo "<div style='display:inline-block; padding:10px 20px 10px 0px;'>";
-            echo "<a href='http://localhost/wordpress/author/".$user->user_nicename."/'>";
-            echo get_avatar($user->ID)."<br/>";
-            echo $user->user_login."</a></div>";
-        }
-        echo "<hr/>";
-        $o=ob_get_contents();
-        ob_end_clean();
-        return $o;
-    }*/
 
     public function SID177_contributors_filtercontent($content=null){
     	wp_enqueue_style('admin-style.css',$this->admin_style);
@@ -295,7 +264,8 @@ class SID177_contributors_plugin{
     		return $posts;
 
     	global $wpdb;
-    	$coposts=$wpdb->get_results("select post_id from wp_postmeta where meta_key='".$this->coauthor_metakey."' and meta_value='".$author->ID."'");
+    	// $coposts=$wpdb->get_results("select post_id from wp_postmeta where meta_key='".$this->coauthor_metakey."' and meta_value='".$author->ID."'");
+        $coposts=$wpdb->get_results($wpdb->prepare("select post_id from wp_postmeta where meta_key='%s' and meta_value='%s'",$this->coauthor_metakey,$author->ID));
     	foreach ($coposts as $copost) {
     		$post=get_post($copost->post_id);
     		if($post && $post->post_status=='publish'){
@@ -307,13 +277,7 @@ class SID177_contributors_plugin{
     			array_push($posts,$post);
     		}
     	}
-    	// echo "contr<br/>";
-    	foreach ($posts as $post) {
-    		// echo $post->post_title."<br>";
-    	}
-    	// die;
     	return $posts;
     }
 }
 new SID177_contributors_plugin();
-?>
