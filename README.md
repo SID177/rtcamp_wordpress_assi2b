@@ -3,7 +3,8 @@
 - This is a wordpress plugin.
 - No dependencies.
 
-Introduction:
+## Introduction:
+
 Any type of post present in get_post_types() function can add multiple CO-AUTHORS from the list of all the users available in get_users() function.
 The multiple CO-AUTHORS will be shown in the post list under Co-Authors list.
 
@@ -23,3 +24,6 @@ The Metabox contains checkboxes with All the available users in get_users() func
 Also contains some extra features like searching an author.
 Searching can be performed based on EMAIL ID or NAME or USERNAME
 
+
+The posts in which an author is selected as a contributor will be shown on the author's archieve page as a contributor post.
+![Checkbox](https://github.com/SID177/uploaded_images/blob/master/Capture6.PNG?raw=true)
